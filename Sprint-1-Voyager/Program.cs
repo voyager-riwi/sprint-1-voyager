@@ -1,12 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-List<List<object>> books = new List<List<object>>();
-List<string[]> usuarios = new List<string[]>();
-List<string[]> prestamos = new List<string[]>();
-List<string[]> reseñas = new List<string[]>();
+// Estructuras de datos principales
+List<List<object>> books = new List<List<object>>(); 
+List<string[]> usuarios = new List<string[]>(); 
+List<string[]> prestamos = new List<string[]>(); 
+List<string[]> reseñas = new List<string[]>(); 
 bool outSystem = false;
 
 while (!outSystem)
@@ -58,6 +59,7 @@ while (!outSystem)
                     string category = Console.ReadLine();
                     Console.Write("Año: ");
                     
+                    // Validación de año: debe estar entre 1000 y año actual
                     if (!int.TryParse(Console.ReadLine(), out int year) || year < 1000 || year > DateTime.Now.Year)
                     {
                         Console.WriteLine("Año inválido");
@@ -94,6 +96,7 @@ while (!outSystem)
 
                     Console.Write("Título del libro: ");
                     string title = Console.ReadLine();
+                    // Buscar libro por título usando LINQ
                     var book = books.FirstOrDefault(b => (string)b[0] == title);
                     
                     if (book == null)
@@ -107,20 +110,20 @@ while (!outSystem)
                     if (!string.IsNullOrEmpty(newTitle)) book[0] = newTitle;
 
                     Console.Write("Nuevo autor (vacío=no cambiar): ");
-                    string newAuthor = Console.ReadLine();
+                            string newAuthor = Console.ReadLine();
                     if (!string.IsNullOrEmpty(newAuthor)) book[1] = newAuthor;
 
                     Console.Write("Nueva categoría (vacío=no cambiar): ");
-                    string newCategory = Console.ReadLine();
+                            string newCategory = Console.ReadLine();
                     if (!string.IsNullOrEmpty(newCategory)) book[2] = newCategory;
 
                     Console.Write("Nuevo año (vacío=no cambiar): ");
-                    string newYear = Console.ReadLine();
+                            string newYear = Console.ReadLine();
                     if (!string.IsNullOrEmpty(newYear) && int.TryParse(newYear, out int year) && year >= 1000 && year <= DateTime.Now.Year)
                         book[3] = year;
 
                     Console.Write("Disponible (s/n, vacío=no cambiar): ");
-                    string newAvailable = Console.ReadLine();
+                            string newAvailable = Console.ReadLine();
                     if (!string.IsNullOrEmpty(newAvailable)) book[4] = newAvailable.ToLower() == "s";
 
                     Console.WriteLine("Libro actualizado");
@@ -236,6 +239,7 @@ void RegistrarUsuario()
     string nombre = ObtenerDatoValidado("Nombre completo: ", ValidarNombre);
     string id = ObtenerDatoValidado("ID: ", ValidarId);
 
+    // Verificar que el ID no esté duplicado
     if (BuscarIndiceUsuarioPorId(id) != -1)
     {
         Console.WriteLine("ID ya existe");
@@ -322,11 +326,11 @@ void ActualizarUsuario()
     Console.WriteLine("Dejar vacío para no cambiar");
 
     Console.Write($"Nombre ({usuario[0]}): ");
-    string nuevoNombre = Console.ReadLine();
+        string nuevoNombre = Console.ReadLine();
     if (!string.IsNullOrEmpty(nuevoNombre)) usuario[0] = nuevoNombre;
 
     Console.Write($"Correo ({usuario[2]}): ");
-    string nuevoCorreo = Console.ReadLine();
+        string nuevoCorreo = Console.ReadLine();
     if (!string.IsNullOrEmpty(nuevoCorreo)) usuario[2] = nuevoCorreo;
 
     Console.WriteLine("Usuario actualizado");
@@ -365,6 +369,7 @@ void EliminarUsuario()
     }
 }
 
+// Función auxiliar para buscar usuario por ID usando LINQ
 int BuscarIndiceUsuarioPorId(string id) => usuarios.FindIndex(u => u[1] == id);
 
 void HandleLoansAndReturns()
@@ -454,12 +459,14 @@ void PrestarLibro()
     string idUsuario = usuarios[indiceUsuario][1];
     string tituloLibro = (string)books[indiceLibro][0];
     
+    // Verificar que el usuario no tenga ya este libro prestado
     if (UsuarioTieneLibroPrestado(idUsuario, tituloLibro))
     {
         Console.WriteLine("Usuario ya tiene este libro");
         return;
     }
 
+    // Registrar préstamo y marcar libro como no disponible
     prestamos.Add(new string[] { idUsuario, tituloLibro, DateTime.Now.ToString("yyyy-MM-dd"), "" });
     books[indiceLibro][4] = false;
     Console.WriteLine($"Libro prestado a {usuarios[indiceUsuario][0]}");
@@ -499,9 +506,11 @@ void DevolverLibro()
         return;
     }
 
+    // Registrar fecha de devolución
     prestamos[indice][3] = DateTime.Now.ToString("yyyy-MM-dd");
     string tituloLibro = prestamos[indice][1];
     
+    // Marcar libro como disponible nuevamente
     for (int i = 0; i < books.Count; i++)
     {
         if ((string)books[i][0] == tituloLibro)
@@ -538,9 +547,11 @@ void MostrarLibrosPrestados()
     if (!hayPrestados) Console.WriteLine("No hay libros prestados");
 }
 
+// Verificar si usuario tiene libro prestado (sin devolver)
 bool UsuarioTieneLibroPrestado(string idUsuario, string tituloLibro) =>
     prestamos.Any(p => p[0] == idUsuario && p[1] == tituloLibro && p[3] == "");
 
+// Obtener nombre de usuario por ID usando LINQ
 string ObtenerNombreUsuarioPorId(string id) =>
     usuarios.FirstOrDefault(u => u[1] == id)?[0] ?? "Usuario no encontrado";
 
@@ -601,12 +612,14 @@ void CalificarLibro()
     indiceUsuario--;
     string idUsuario = usuarios[indiceUsuario][1];
 
+    // Verificar que el usuario no haya calificado ya este libro
     if (UsuarioYaCalificoLibro(idUsuario, tituloLibro))
     {
         Console.WriteLine("Usuario ya calificó este libro");
         return;
     }
 
+    // Validación de calificación: rango 0.0 a 5.0
     Console.Write("Calificación (0.0 a 5.0): ");
     if (!double.TryParse(Console.ReadLine(), out double calificacion) || calificacion < 0.0 || calificacion > 5.0)
     {
@@ -653,12 +666,14 @@ void EscribirReseña()
     Console.Write("Reseña (máximo 500 caracteres): ");
     string reseña = Console.ReadLine();
 
+    // Validación de reseña: no vacía y máximo 500 caracteres
     if (string.IsNullOrWhiteSpace(reseña) || reseña.Length > 500)
     {
         Console.WriteLine("Reseña inválida");
         return;
     }
 
+    // Si ya existe reseña, actualizarla; si no, crear nueva
     int indiceExistente = BuscarReseñaExistente(idUsuario, tituloLibro);
     if (indiceExistente != -1)
     {
@@ -693,6 +708,7 @@ void VerCalificaciones()
     indiceLibro--;
     string tituloLibro = (string)books[indiceLibro][0];
 
+    // Filtrar calificaciones válidas del libro usando LINQ
     var calificaciones = reseñas.Where(r => r[0] == tituloLibro && r[2] != "0.0" && double.TryParse(r[2], out _))
                                 .Select(r => double.Parse(r[2])).ToList();
 
@@ -830,9 +846,11 @@ void MostrarLibroMasPrestado()
         return;
     }
     
+    // Agrupar préstamos por libro y contar ocurrencias
     var prestamosPorLibro = prestamos.GroupBy(p => p[1])
                                    .ToDictionary(g => g.Key, g => g.Count());
     
+    // Encontrar el libro con más préstamos
     var libroMasPrestado = prestamosPorLibro.OrderByDescending(kvp => kvp.Value).First();
     
     var book = books.FirstOrDefault(b => (string)b[0] == libroMasPrestado.Key);
@@ -860,6 +878,7 @@ void MostrarLibrosMasCalificados()
         return;
     }
     
+    // Agrupar calificaciones por libro y calcular promedios
     var calificacionesPorLibro = reseñas.Where(r => r[2] != "0.0" && double.TryParse(r[2], out _))
                                         .GroupBy(r => r[0])
                                         .ToDictionary(g => g.Key, g => g.Select(r => double.Parse(r[2])).ToList());
@@ -870,6 +889,7 @@ void MostrarLibrosMasCalificados()
         return;
     }
     
+    // Calcular promedios y ordenar por calificación más alta
     var librosConPromedio = calificacionesPorLibro.Select(kvp => 
         (titulo: kvp.Key, promedio: kvp.Value.Average(), cantidad: kvp.Value.Count))
         .OrderByDescending(x => x.promedio).Take(5).ToList();
