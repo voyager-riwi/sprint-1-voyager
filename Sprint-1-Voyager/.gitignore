@@ -1,2 +1,48 @@
+# Build results
 bin/
 obj/
+out/
+
+# Visual Studio / Visual Studio Code
+.vs/
+.vscode/
+*.user
+*.suo
+*.cache
+
+# JetBrains IDEs
+.idea/
+*.sln.iml
+
+# User-specific files
+*.rsuser
+*.userosscache
+*.sln.docstates
+
+# Mono auto generated files
+mono_crash.*
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Mac
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# Log files
+*.log
+
+# Backup files
+*.bak
+*.backup
